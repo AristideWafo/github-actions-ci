@@ -1,0 +1,185 @@
+plugins {
+	id 'java'
+	id 'jacoco'
+	id 'org.springframework.boot' version '3.5.3'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id 'com.diffplug.spotless' version '7.0.2'
+	id "com.mooltiverse.oss.nyx" version "3.1.4"
+}
+
+group = 'com.devops'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+spotless {
+	java {
+		googleJavaFormat() // ou prettier(), eclipse(), etc.
+		target 'src/**/*.java'
+	}
+	groovyGradle {
+		target '*.gradle'
+		greclipse()
+	}
+}
+
+jacoco {
+	toolVersion = "0.8.13"
+	reportsDirectory = layout.buildDirectory.dir("reports/jacoco")
+}
+jacocoTestReport {
+	reports {
+		xml.required = true
+		html.required = true
+		html.outputLocation = layout.buildDirectory.dir('reports/jacoco/test/html')
+	}
+}
+
+nyx {
+	changelog {
+		path = 'build/CHANGELOG.md'
+		sections = [
+			'Added' : '^feat$',
+			'Fixed' : '^fix$',
+		]
+		substitutions = [
+			'(?m)#([0-9]+)(?s)': '[#%s](https://example.com/issues/%s)'
+		]
+	}
+	releaseAssets {
+		changelogMd {
+			description = 'Changelog'
+			fileName = 'CHANGELOG-{{version}}.md'
+			path = 'build/CHANGELOG.md'
+			type = 'text/markdown'
+		}
+		appJar {
+			description = 'Application JAR'
+			fileName = '{{project.name}}-{{version}}.jar'
+			path = 'build/libs/{{project.name}}.jar'
+			type = 'application/java-archive'
+		}
+	}
+	commitMessageConventions {
+		enabled = ['conventionalCommits']
+		items {
+			conventionalCommits {
+				expression = '(?m)^(?<type>[a-zA-Z0-9_]+)(\\((?<scope>[a-zA-Z0-9 \\-_]+)\\))?(!)?:( (?<title>.+))$(?s).*'
+				bumpExpressions {
+					major = '(?s)(?m)^[a-zA-Z0-9_]+(\\([a-zA-Z0-9 \\-_]+\\))?(!: .*|.*^(BREAKING( |-)CHANGE: )).*'
+					minor = '(?s)(?m)^feat(!{0})(\\([a-zA-Z0-9 \\-_]+\\))?: (?!.*^(BREAKING( |-)CHANGE: )).*'
+					patch = '(?s)(?m)^fix(!{0})(\\([a-zA-Z0-9 \\-_]+\\))?: (?!.*^(BREAKING( |-)CHANGE: )).*'
+				}
+			}
+		}
+	}
+	dryRun = false
+	git {
+		remotes {
+			origin {
+				user = 'gitlab-ci-token'
+				password = '{{#environmentVariable}}CI_JOB_TOKEN{{/environmentVariable}}'
+			}
+		}
+	}
+	initialVersion = '0.0.0'
+	releaseLenient = true
+	releasePrefix = 'v'
+	releaseTypes {
+		enabled = ['mainline']
+		publicationServices = ['gitlab']
+		items {
+			mainline {
+				collapseVersions = false
+				filterTags = '^({{configuration.releasePrefix}})?([0-9]\\d*)\\.([0-9]\\d*)\\.([0-9]\\d*)$'
+				gitCommit = 'true'
+				gitCommitMessage = 'Release version {{version}}'
+				gitPush = 'true'
+				//				gitPushForce = 'true'
+				gitTag = 'true'
+				//				gitTagForce = 'true'
+				//				gitTagMessage = 'Tag release {{version}}
+				gitTagNames = [
+					'{{version}}',
+					'stable',
+					'latest'
+				]
+				matchBranches = ' '
+				//				matchWorkspaceStatus = 'DIRTY'
+				assets = 'changelogMd, appJar'
+				publish = 'true'
+				releaseName = 'Release {{version}}'
+				versionRangeFromBranchName = false
+			}
+		}
+	}
+	scheme = 'SEMVER'
+	services {
+		gitlab {
+			type = 'GITLAB'
+			options {
+				AUTHENTICATION_TOKEN = '{{#environmentVariable}}GITLAB_TOKEN{{/environmentVariable}}'
+				REPOSITORY_NAME = '{{#environmentVariable}}CI_PROJECT_NAME{{/environmentVariable}}'
+				REPOSITORY_OWNER = '{{#environmentVariable}}CI_PROJECT_NAMESPACE{{/environmentVariable}}'
+			}
+		}
+	}
+	verbosity = 'INFO'
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'com.mysql:mysql-connector-j'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.mockito:mockito-core'
+	testImplementation 'com.h2database:h2'
+
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			limit {
+				counter = 'LINE'
+				value = 'COVEREDRATIO'
+				minimum = 0.80.toBigDecimal()
+			}
+		}
+		rule {
+			element = 'CLASS'
+			limit {
+				counter = 'LINE'
+				value = 'COVEREDRATIO'
+				minimum = 0.70.toBigDecimal()
+			}
+		}
+	}
+}
+
+test {
+	finalizedBy jacocoTestReport
+}
+jacocoTestReport {
+	dependsOn test
+}
+check {
+	dependsOn jacocoTestCoverageVerification
+}
