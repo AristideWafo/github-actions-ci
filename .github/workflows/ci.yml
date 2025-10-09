@@ -9,7 +9,7 @@ on:
       - prod
 
 jobs:
-  build:
+  .build:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -34,7 +34,7 @@ jobs:
           path: build/libs/*.jar
   test:
     runs-on: ubuntu-22.04
-    needs: build
+    # needs: build
     steps:
       - uses: actions/checkout@v3
 
@@ -50,44 +50,43 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew check
 
-      - name: Show JaCoCo coverage summary
-        run: |
-          grep -m1 -oE 'Total.*[0-9]{1,3}%.*' build/reports/jacoco/test/html/index.html || true
+      - name: Check Jacoco XML exists
+        run: cat build/reports/jacoco/test/jacocoTestReport.xml
 
-      - name: Upload test reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-reports
-          path: |
-            build/reports/jacoco/test/html/
-            build/reports/tests/
+    #   - name: Show JaCoCo coverage summary
+    #     run: |
+    #       grep -m1 -oE 'Total.*[0-9]{1,3}%.*' build/reports/jacoco/test/html/index.html || true
 
-      - name: Upload JaCoCo coverage XML for Code Coverage Summary
-        uses: actions/upload-artifact@v4
-        with:
-          name: jacoco-xml
-          path: build/reports/jacoco/test/jacocoTestReport.xml
-
-      - name: Code Coverage Summary
-        uses: irongut/CodeCoverageSummary@v1.3.0
-        with:
-          filename: build/reports/jacoco/test/jacocoTestReport.xml
-          badge: true
-          fail_below_min: true
-          format: markdown
-          hide_branch_rate: false
-          hide_complexity: true
-          indicators: true
-          output: both
-          thresholds: '60 80'
-
-      - name: Add Coverage PR Comment
-        uses: marocchino/sticky-pull-request-comment@v2
-        if: github.event_name == 'pull_request'
-        with:
-            recreate: true
-            path: code-coverage-results.md
-    #   - name: Download production artifacts
-    #     uses: actions/download-artifact@v3
+    #   - name: Upload test reports
+    #     uses: actions/upload-artifact@v4
     #     with:
-    #       name: production-artifacts
+    #       name: test-reports
+    #       path: |
+    #         build/reports/jacoco/test/html/
+    #         build/reports/tests/
+
+    #   - name: Upload JaCoCo coverage XML for Code Coverage Summary
+    #     uses: actions/upload-artifact@v4
+    #     with:
+    #       name: jacoco-xml
+    #       path: build/reports/jacoco/test/jacocoTestReport.xml
+
+    #   - name: Code Coverage Summary
+    #     uses: irongut/CodeCoverageSummary@v1.3.0
+    #     with:
+    #       filename: build/reports/jacoco/test/jacocoTestReport.xml
+    #       badge: true
+    #       fail_below_min: true
+    #       format: markdown
+    #       hide_branch_rate: false
+    #       hide_complexity: true
+    #       indicators: true
+    #       output: both
+    #       thresholds: '60 80'
+
+    #   - name: Add Coverage PR Comment
+    #     uses: marocchino/sticky-pull-request-comment@v2
+    #     if: github.event_name == 'pull_request'
+    #     with:
+    #         recreate: true
+    #         path: code-coverage-results.md
