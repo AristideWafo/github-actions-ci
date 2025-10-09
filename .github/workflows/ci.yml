@@ -33,6 +33,8 @@ jobs:
            name: production-artifacts
            path: build/libs/*.jar
   test:
+    permissions:
+      pull-requests: write
     runs-on: ubuntu-22.04
     needs: build
     steps:
