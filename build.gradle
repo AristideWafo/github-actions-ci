@@ -17,7 +17,7 @@ java {
 
 spotless {
 	java {
-		googleJavaFormat() // ou prettier(), eclipse(), etc.
+		googleJavaFormat()
 		target 'src/**/*.java'
 	}
 	groovyGradle {
@@ -33,7 +33,7 @@ jacoco {
 jacocoTestReport {
 	reports {
 		xml.required = true
-        xml.outputLocation = file("$buildDir/reports/jacoco/test/jacocoTestReport.xml")
+		xml.outputLocation = file("$buildDir/reports/jacoco/test/jacocoTestReport.xml")
 		html.required = true
 		html.outputLocation = layout.buildDirectory.dir('reports/jacoco/test/html')
 	}
