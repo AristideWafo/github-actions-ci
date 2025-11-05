@@ -36,8 +36,8 @@ jobs:
          with:
            name: build-artifacts
            path: |
-             build/
              build/libs/*.jar
+             !build/libs/*-plain.jar
            retention-days: 7
   test:
     permissions:
@@ -116,6 +116,7 @@ jobs:
   release:
     runs-on: ubuntu-22.04
     needs: [build, test]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/prod' || github.ref == 'refs/heads/main')
     permissions:
       contents: write
       packages: write
@@ -141,32 +142,42 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
-          path: build/
+          path: build/libs/
 
-      - name: Ensure build directory exists
-        run: mkdir -p build
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Run Nyx
-        run: ./gradlew nyxMake nyxMark nyxPublish
+      - name: Infer version with Nyx
+        id: nyx-infer
+        run: |
+          VERSION=$(./gradlew -q nyxInfer --no-daemon | grep 'Project version:' | awk '{print $3}')
+          if [ -z "$VERSION" ]; then
+            echo "❌ Failed to infer version"
+            exit 1
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
 
-      - name: Get version from Nyx
-        id: version
-        run: |
-          VERSION=$(./gradlew -q nyxPrint | grep 'version:' | awk '{print $2}')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      - name: Run Nyx
+        run: ./gradlew nyxMake nyxMark nyxPublish --no-daemon
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
 
       - name: Upload artifacts to release
-        if: steps.version.outputs.version != ''
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ steps.version.outputs.version }}
-          name: Release ${{ steps.version.outputs.version }}
+          tag_name: ${{ steps.nyx-infer.outputs.version }}
+          name: Release ${{ steps.nyx-infer.outputs.version }}
           body_path: build/CHANGELOG.md
           files: |
             build/libs/*.jar
-            build/CHANGELOG-*.md
+            build/CHANGELOG.md

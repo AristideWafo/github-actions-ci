@@ -56,14 +56,14 @@ nyx {
 	releaseAssets {
 		changelogMd {
 			description = 'Changelog'
-			fileName = 'CHANGELOG-{{version}}.md'
+			fileName = 'CHANGELOG.md'
 			path = 'build/CHANGELOG.md'
 			type = 'text/markdown'
 		}
 		appJar {
 			description = 'Application JAR'
 			fileName = '{{project.name}}-{{version}}.jar'
-			path = 'build/libs/cicd-*.jar'
+			path = 'build/libs/cicd.jar'
 			type = 'application/java-archive'
 		}
 	}
