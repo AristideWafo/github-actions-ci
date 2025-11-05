@@ -13,32 +13,32 @@ env:
 
 jobs:
   build:
-     runs-on: ubuntu-22.04
-     steps:
-       - name: Checkout code
-         uses: actions/checkout@v4
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-       - name: Set up JDK ${{ env.JAVA_VERSION }}
-         uses: actions/setup-java@v4
-         with:
-           distribution: ${{ env.JAVA_DISTRIBUTION }}
-           java-version: ${{ env.JAVA_VERSION }}
-           cache: 'gradle'
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
 
-       - name: Grant execute permission for gradlew
-         run: chmod +x ./gradlew
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
 
-       - name: Build with Gradle
-         run: ./gradlew build -x test --no-daemon
+      - name: Build with Gradle
+        run: ./gradlew build -x test --no-daemon
 
-       - name: Archive build artifacts
-         uses: actions/upload-artifact@v4
-         with:
-           name: build-artifacts
-           path: |
-             build/libs/*.jar
-             !build/libs/*-plain.jar
-           retention-days: 7
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            build/libs/*.jar
+            !build/libs/*-plain.jar
+          retention-days: 7
   test:
     permissions:
       pull-requests: write
@@ -162,7 +162,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
 
       - name: Run Nyx
         run: ./gradlew nyxMake nyxMark nyxPublish --no-daemon
@@ -170,12 +169,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
 
       - name: Upload artifacts to release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ steps.nyx-infer.outputs.version }}
+          tag_name: v${{ steps.nyx-infer.outputs.version }}
           name: Release ${{ steps.nyx-infer.outputs.version }}
           body_path: build/CHANGELOG.md
           files: |
@@ -188,5 +186,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
           VERSION: ${{ steps.nyx-infer.outputs.version }}
