@@ -153,7 +153,7 @@ jobs:
         id: nyx-infer
         run: |
           ./gradlew nyxInfer --no-daemon
-          VERSION=$(./gradlew -q nyxPrint --no-daemon | grep 'Project version:' | awk '{print $3}')
+          VERSION=$(./gradlew -q nyxInfer --no-daemon | grep 'Project version:' | awk '{print $3}')
           if [ -z "$VERSION" ]; then
             echo "❌ Failed to infer version"
             exit 1
