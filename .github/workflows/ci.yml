@@ -157,7 +157,7 @@ jobs:
         id: nyx-infer
         run: |
           ./gradlew nyxInfer --no-daemon
-          VERSION=$(./gradlew -q nyxPrint --no-daemon | grep 'version:' | awk '{print $2}')
+          VERSION=$(./gradlew nyxInfer --no-daemon | grep 'version:' | awk '{print $2}')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "📦 Inferred version: $VERSION"
         env:
