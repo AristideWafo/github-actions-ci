@@ -181,3 +181,13 @@ jobs:
           files: |
             build/libs/*.jar
             build/CHANGELOG.md
+
+      - name: Publish to GitHub Packages
+        if: steps.check-version.outputs.is-new == 'true'
+        run: ./gradlew publish --no-daemon
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+          VERSION: ${{ steps.nyx-infer.outputs.version }}
