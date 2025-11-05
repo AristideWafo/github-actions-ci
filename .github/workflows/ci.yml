@@ -116,7 +116,7 @@ jobs:
   release:
     runs-on: ubuntu-22.04
     needs: [build, test]
-#    if: github.event_name == 'push' && (github.ref == 'refs/heads/prod' || github.ref == 'refs/heads/main')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/prod' || github.ref == 'refs/heads/main')
     permissions:
       contents: write
       packages: write
