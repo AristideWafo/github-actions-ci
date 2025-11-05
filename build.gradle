@@ -1,213 +1,213 @@
 plugins {
-    id 'java'
-    id 'maven-publish'
-    id 'jacoco'
-    id 'org.springframework.boot' version '3.5.3'
-    id 'io.spring.dependency-management' version '1.1.7'
-    id 'com.diffplug.spotless' version '7.0.2'
-    id "com.mooltiverse.oss.nyx" version "3.1.4"
+	id 'java'
+	id 'maven-publish'
+	id 'jacoco'
+	id 'org.springframework.boot' version '3.5.3'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id 'com.diffplug.spotless' version '7.0.2'
+	id "com.mooltiverse.oss.nyx" version "3.1.4"
 }
 
 group = 'com.devops'
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
 }
 
 spotless {
-    java {
-        googleJavaFormat()
-        target 'src/**/*.java'
-    }
-    groovyGradle {
-        target '*.gradle'
-        greclipse()
-    }
+	java {
+		googleJavaFormat()
+		target 'src/**/*.java'
+	}
+	groovyGradle {
+		target '*.gradle'
+		greclipse()
+	}
 }
 
 jacoco {
-    toolVersion = "0.8.13"
-    reportsDirectory = layout.buildDirectory.dir("reports/jacoco")
+	toolVersion = "0.8.13"
+	reportsDirectory = layout.buildDirectory.dir("reports/jacoco")
 }
 jacocoTestReport {
-    reports {
-        xml.required = true
-        xml.outputLocation = file("$buildDir/reports/jacoco/test/jacocoTestReport.xml")
-        html.required = true
-        html.outputLocation = layout.buildDirectory.dir('reports/jacoco/test/html')
-    }
+	reports {
+		xml.required = true
+		xml.outputLocation = file("$buildDir/reports/jacoco/test/jacocoTestReport.xml")
+		html.required = true
+		html.outputLocation = layout.buildDirectory.dir('reports/jacoco/test/html')
+	}
 }
 
 nyx {
-    changelog {
-        path = 'build/CHANGELOG.md'
-        sections = [
-                'Added'   : '^feat$',
-                'Fixed'   : '^fix$',
-                'Changed' : '^refactor$',
-                'Removed' : '^remove$'
-        ]
-        substitutions = [
-                '(?m)#([0-9]+)(?s)': '[#%s](https://github.com/{{#environmentVariable}}GITHUB_REPOSITORY{{/environmentVariable}}/issues/%s)'
-        ]
-    }
+	changelog {
+		path = 'build/CHANGELOG.md'
+		sections = [
+			'Added'   : '^feat$',
+			'Fixed'   : '^fix$',
+			'Changed' : '^refactor$',
+			'Removed' : '^remove$'
+		]
+		substitutions = [
+			'(?m)#([0-9]+)(?s)': '[#%s](https://github.com/{{#environmentVariable}}GITHUB_REPOSITORY{{/environmentVariable}}/issues/%s)'
+		]
+	}
 
-    releaseAssets {
-        changelogMd {
-            description = 'Changelog'
-            fileName = 'CHANGELOG.md'
-            path = 'build/CHANGELOG.md'
-            type = 'text/markdown'
-        }
-        appJar {
-            description = 'Application JAR'
-            fileName = '{{project.name}}-{{version}}.jar'
-            path = 'build/libs/cicd.jar'
-            type = 'application/java-archive'
-        }
-    }
+	releaseAssets {
+		changelogMd {
+			description = 'Changelog'
+			fileName = 'CHANGELOG.md'
+			path = 'build/CHANGELOG.md'
+			type = 'text/markdown'
+		}
+		appJar {
+			description = 'Application JAR'
+			fileName = '{{project.name}}-{{version}}.jar'
+			path = 'build/libs/cicd.jar'
+			type = 'application/java-archive'
+		}
+	}
 
-    commitMessageConventions {
-        enabled = ['conventionalCommits']
-        items {
-            conventionalCommits {
-                expression = '(?m)^(?<type>[a-zA-Z0-9_]+)(\\((?<scope>[a-zA-Z0-9 \\-_]+)\\))?(!)?:( (?<title>.+))$(?s).*'
-                bumpExpressions {
-                    major = '(?s)(?m)^[a-zA-Z0-9_]+(\\([a-zA-Z0-9 \\-_]+\\))?(!: .*|.*^(BREAKING( |-)CHANGE: )).*'
-                    minor = '(?s)(?m)^feat(!{0})(\\([a-zA-Z0-9 \\-_]+\\))?: (?!.*^(BREAKING( |-)CHANGE: )).*'
-                    patch = '(?s)(?m)^fix(!{0})(\\([a-zA-Z0-9 \\-_]+\\))?: (?!.*^(BREAKING( |-)CHANGE: )).*'
-                }
-            }
-        }
-    }
+	commitMessageConventions {
+		enabled = ['conventionalCommits']
+		items {
+			conventionalCommits {
+				expression = '(?m)^(?<type>[a-zA-Z0-9_]+)(\\((?<scope>[a-zA-Z0-9 \\-_]+)\\))?(!)?:( (?<title>.+))$(?s).*'
+				bumpExpressions {
+					major = '(?s)(?m)^[a-zA-Z0-9_]+(\\([a-zA-Z0-9 \\-_]+\\))?(!: .*|.*^(BREAKING( |-)CHANGE: )).*'
+					minor = '(?s)(?m)^feat(!{0})(\\([a-zA-Z0-9 \\-_]+\\))?: (?!.*^(BREAKING( |-)CHANGE: )).*'
+					patch = '(?s)(?m)^fix(!{0})(\\([a-zA-Z0-9 \\-_]+\\))?: (?!.*^(BREAKING( |-)CHANGE: )).*'
+				}
+			}
+		}
+	}
 
-    dryRun = false
+	dryRun = false
 
-    git {
-        remotes {
-            origin {
-                authenticationMethod = 'USER_PASSWORD'
-                user = '{{#environmentVariable}}GITHUB_ACTOR{{/environmentVariable}}'
-                password = '{{#environmentVariable}}GITHUB_TOKEN{{/environmentVariable}}'
-            }
-        }
-    }
+	git {
+		remotes {
+			origin {
+				authenticationMethod = 'USER_PASSWORD'
+				user = '{{#environmentVariable}}GITHUB_ACTOR{{/environmentVariable}}'
+				password = '{{#environmentVariable}}GITHUB_TOKEN{{/environmentVariable}}'
+			}
+		}
+	}
 
-    initialVersion = '0.0.0'
-    releaseLenient = true
-    releasePrefix = 'v'
+	initialVersion = '0.0.0'
+	releaseLenient = true
+	releasePrefix = 'v'
 
-    releaseTypes {
-        enabled = ['mainline']
-        publicationServices = ['github']
-        items {
-            mainline {
-                collapseVersions = false
-                filterTags = '^({{configuration.releasePrefix}})?([0-9]\\d*)\\.([0-9]\\d*)\\.([0-9]\\d*)$'
-                gitCommit = 'true'
-                gitCommitMessage = 'chore(release): {{version}} [skip ci]'
-                gitPush = 'true'
-                gitTag = 'true'
-                gitTagNames = ['{{version}}']
-                matchBranches = ' '
-                assets = 'changelogMd, appJar'
-                publish = 'true'
-                releaseName = 'Release {{version}}'
-                versionRangeFromBranchName = false
-            }
-        }
-    }
+	releaseTypes {
+		enabled = ['mainline']
+		publicationServices = ['github']
+		items {
+			mainline {
+				collapseVersions = false
+				filterTags = '^({{configuration.releasePrefix}})?([0-9]\\d*)\\.([0-9]\\d*)\\.([0-9]\\d*)$'
+				gitCommit = 'true'
+				gitCommitMessage = 'chore(release): {{version}} [skip ci]'
+				gitPush = 'true'
+				gitTag = 'true'
+				gitTagNames = ['{{version}}']
+				matchBranches = ' '
+				assets = 'changelogMd, appJar'
+				publish = 'true'
+				releaseName = 'Release {{version}}'
+				versionRangeFromBranchName = false
+			}
+		}
+	}
 
-    scheme = 'SEMVER'
+	scheme = 'SEMVER'
 
-    services {
-        github {
-            type = 'GITHUB'
-            options {
-                AUTHENTICATION_TOKEN = '{{#environmentVariable}}GITHUB_TOKEN{{/environmentVariable}}'
-                REPOSITORY_NAME = '{{#environmentVariable}}GITHUB_REPOSITORY{{/environmentVariable}}'
-            }
-        }
-    }
+	services {
+		github {
+			type = 'GITHUB'
+			options {
+				AUTHENTICATION_TOKEN = '{{#environmentVariable}}GITHUB_TOKEN{{/environmentVariable}}'
+				REPOSITORY_NAME = '{{#environmentVariable}}GITHUB_REPOSITORY{{/environmentVariable}}'
+			}
+		}
+	}
 
-    verbosity = 'INFO'
+	verbosity = 'INFO'
 }
 
 repositories {
-    mavenCentral()
+	mavenCentral()
 }
 publishing {
-    publications {
-        bootJava(MavenPublication) {
-            artifact bootJar
+	publications {
+		bootJava(MavenPublication) {
+			artifact bootJar
 
-            groupId = project.group
-            artifactId = project.name
-            version = System.getenv("VERSION")
-        }
-    }
+			groupId = project.group
+			artifactId = project.name
+			version = System.getenv("VERSION")
+		}
+	}
 
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/${System.getenv("GITHUB_REPOSITORY")}}")
+	repositories {
+		maven {
+			name = "GitHubPackages"
+			url = uri("https://maven.pkg.github.com/${System.getenv("GITHUB_REPOSITORY")}")
 
-            credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
-            }
-        }
-    }
+			credentials {
+				username = System.getenv("GITHUB_ACTOR")
+				password = System.getenv("GITHUB_TOKEN")
+			}
+		}
+	}
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'com.mysql:mysql-connector-j'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'com.mysql:mysql-connector-j'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.mockito:mockito-core'
-    testImplementation 'com.h2database:h2'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.mockito:mockito-core'
+	testImplementation 'com.h2database:h2'
 
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 }
 
 tasks.named('test') {
-    useJUnitPlatform()
+	useJUnitPlatform()
 }
 
 jacocoTestCoverageVerification {
-    violationRules {
-        rule {
-            limit {
-                counter = 'LINE'
-                value = 'COVEREDRATIO'
-                minimum = 0.80.toBigDecimal()
-            }
-        }
-        rule {
-            element = 'CLASS'
-            limit {
-                counter = 'LINE'
-                value = 'COVEREDRATIO'
-                minimum = 0.70.toBigDecimal()
-            }
-        }
-    }
+	violationRules {
+		rule {
+			limit {
+				counter = 'LINE'
+				value = 'COVEREDRATIO'
+				minimum = 0.80.toBigDecimal()
+			}
+		}
+		rule {
+			element = 'CLASS'
+			limit {
+				counter = 'LINE'
+				value = 'COVEREDRATIO'
+				minimum = 0.70.toBigDecimal()
+			}
+		}
+	}
 }
 
 test {
-    finalizedBy jacocoTestReport
+	finalizedBy jacocoTestReport
 }
 jacocoTestReport {
-    dependsOn test
+	dependsOn test
 }
 check {
-    dependsOn jacocoTestCoverageVerification
+	dependsOn jacocoTestCoverageVerification
 }
