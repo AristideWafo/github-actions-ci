@@ -50,7 +50,7 @@ nyx {
 			'Removed' : '^remove$'
 		]
 		substitutions = [
-			'(?m)#([0-9]+)(?s)': '[#%s](https://github.com/{{#environmentVariable}}GITHUB_REPOSITORY_OWNER{{/environmentVariable}}/{{#environmentVariable}}GITHUB_REPOSITORY{{/environmentVariable}}/issues/%s)'
+			'(?m)#([0-9]+)(?s)': '[#%s](https://github.com/{{#environmentVariable}}GITHUB_REPOSITORY{{/environmentVariable}}/issues/%s)'
 		]
 	}
 
@@ -128,7 +128,6 @@ nyx {
 			options {
 				AUTHENTICATION_TOKEN = '{{#environmentVariable}}GITHUB_TOKEN{{/environmentVariable}}'
 				REPOSITORY_NAME = '{{#environmentVariable}}GITHUB_REPOSITORY{{/environmentVariable}}'
-				REPOSITORY_OWNER = '{{#environmentVariable}}GITHUB_REPOSITORY_OWNER{{/environmentVariable}}'
 			}
 		}
 	}
@@ -153,7 +152,7 @@ publishing {
 	repositories {
 		maven {
 			name = "GitHubPackages"
-			url = uri("https://maven.pkg.github.com/${System.getenv("GITHUB_REPOSITORY_OWNER")}/${System.getenv("GITHUB_REPOSITORY")}")
+			url = uri("https://maven.pkg.github.com/${System.getenv("GITHUB_REPOSITORY")}")
 
 			credentials {
 				username = System.getenv("GITHUB_ACTOR")
