@@ -144,14 +144,10 @@ jobs:
 #          name: build-artifacts
 #          path: build/libs/
 
-      - name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: nyx
-        run: |
-          ./gradlew nyxInfer
+#      - name: Configure Git
+#        run: |
+#          git config user.name "github-actions[bot]"
+#          git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Infer version with Nyx
         id: nyx-infer
@@ -160,6 +156,9 @@ jobs:
           VERSION=$(./gradlew nyxInfer --no-daemon | grep 'version:' | awk '{print $2}')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "📦 Inferred version: $VERSION"
+          echo "📦 Inferred version: $(./gradlew nyxInfer --no-daemon | grep 'version:' | awk '{print $2}')"
+          VERSION=$(./gradlew -q nyxPrint --no-daemon | grep 'version:' | awk '{print $2}' | sed 's/^v//')
+          echo "📦 Inferred version: $(./gradlew nyxInfer --no-daemon | grep 'version:' | awk '{print $2}')"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
@@ -180,13 +179,13 @@ jobs:
 #          VERSION=$(./gradlew -q nyxPrint | grep 'version:' | awk '{print $2}')
 #          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Upload artifacts to release
-        if: steps.version.outputs.version != ''
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ steps.version.outputs.version }}
-          name: Release ${{ steps.version.outputs.version }}
-          body_path: build/CHANGELOG.md
-          files: |
-            build/libs/*.jar
-            build/CHANGELOG-*.md
+#      - name: Upload artifacts to release
+#        if: steps.version.outputs.version != ''
+#        uses: softprops/action-gh-release@v1
+#        with:
+#          tag_name: v${{ steps.version.outputs.version }}
+#          name: Release ${{ steps.version.outputs.version }}
+#          body_path: build/CHANGELOG.md
+#          files: |
+#            build/libs/*.jar
+#            build/CHANGELOG-*.md
