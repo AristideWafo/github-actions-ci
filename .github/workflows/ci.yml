@@ -36,8 +36,8 @@ jobs:
          with:
            name: build-artifacts
            path: |
-             build/
              build/libs/*.jar
+             !build/libs/*-plain.jar
            retention-days: 7
   test:
     permissions:
@@ -116,6 +116,7 @@ jobs:
   release:
     runs-on: ubuntu-22.04
     needs: [build, test]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/prod' || github.ref == 'refs/heads/main')
     permissions:
       contents: write
       packages: write
@@ -141,13 +142,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
-          path: build/
+          path: build/libs/
 
       - name: Ensure build directory exists
         run: mkdir -p build
 
       - name: Run Nyx
-        run: ./gradlew nyxMake nyxMark nyxPublish
+        run: ./gradlew nyxMake nyxMark nyxPublish --no-daemon
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
