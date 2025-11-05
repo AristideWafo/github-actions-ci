@@ -116,7 +116,7 @@ jobs:
   release:
     runs-on: ubuntu-22.04
     needs: [build, test]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/prod' || github.ref == 'refs/heads/main')
+#    if: github.event_name == 'push' && (github.ref == 'refs/heads/prod' || github.ref == 'refs/heads/main')
     permissions:
       contents: write
       packages: write
@@ -144,8 +144,22 @@ jobs:
           name: build-artifacts
           path: build/libs/
 
-      - name: Ensure build directory exists
-        run: mkdir -p build
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Infer version with Nyx
+        id: nyx-infer
+        run: |
+          VERSION=$(./gradlew -q nyxInfer --no-daemon | grep 'version: v' | awk '{print $2}')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Inferred version: $VERSION"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
 
       - name: Run Nyx
         run: ./gradlew nyxMake nyxMark nyxPublish --no-daemon
