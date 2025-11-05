@@ -43,13 +43,16 @@ nyx {
 	changelog {
 		path = 'build/CHANGELOG.md'
 		sections = [
-			'Added' : '^feat$',
-			'Fixed' : '^fix$',
+			'Added'   : '^feat$',
+			'Fixed'   : '^fix$',
+			'Changed' : '^refactor$',
+			'Removed' : '^remove$'
 		]
 		substitutions = [
-			'(?m)#([0-9]+)(?s)': '[#%s](https://example.com/issues/%s)'
+			'(?m)#([0-9]+)(?s)': '[#%s](https://github.com/{{#environmentVariable}}GITHUB_REPOSITORY_OWNER{{/environmentVariable}}/{{#environmentVariable}}GITHUB_REPOSITORY{{/environmentVariable}}/issues/%s)'
 		]
 	}
+
 	releaseAssets {
 		changelogMd {
 			description = 'Changelog'
@@ -60,10 +63,11 @@ nyx {
 		appJar {
 			description = 'Application JAR'
 			fileName = '{{project.name}}-{{version}}.jar'
-			path = 'build/libs/{{project.name}}.jar'
+			path = 'build/libs/cicd-*.jar'
 			type = 'application/java-archive'
 		}
 	}
+
 	commitMessageConventions {
 		enabled = ['conventionalCommits']
 		items {
@@ -77,39 +81,36 @@ nyx {
 			}
 		}
 	}
+
 	dryRun = false
+
 	git {
 		remotes {
 			origin {
-				user = 'gitlab-ci-token'
-				password = '{{#environmentVariable}}CI_JOB_TOKEN{{/environmentVariable}}'
+				authenticationMethod = 'USER_PASSWORD'
+				user = '{{#environmentVariable}}GITHUB_ACTOR{{/environmentVariable}}'
+				password = '{{#environmentVariable}}GITHUB_TOKEN{{/environmentVariable}}'
 			}
 		}
 	}
+
 	initialVersion = '0.0.0'
 	releaseLenient = true
 	releasePrefix = 'v'
+
 	releaseTypes {
 		enabled = ['mainline']
-		publicationServices = ['gitlab']
+		publicationServices = ['github']
 		items {
 			mainline {
 				collapseVersions = false
 				filterTags = '^({{configuration.releasePrefix}})?([0-9]\\d*)\\.([0-9]\\d*)\\.([0-9]\\d*)$'
 				gitCommit = 'true'
-				gitCommitMessage = 'Release version {{version}}'
+				gitCommitMessage = 'chore(release): {{version}} [skip ci]'
 				gitPush = 'true'
-				//				gitPushForce = 'true'
 				gitTag = 'true'
-				//				gitTagForce = 'true'
-				//				gitTagMessage = 'Tag release {{version}}
-				gitTagNames = [
-					'{{version}}',
-					'stable',
-					'latest'
-				]
+				gitTagNames = ['{{version}}']
 				matchBranches = ' '
-				//				matchWorkspaceStatus = 'DIRTY'
 				assets = 'changelogMd, appJar'
 				publish = 'true'
 				releaseName = 'Release {{version}}'
@@ -117,17 +118,20 @@ nyx {
 			}
 		}
 	}
+
 	scheme = 'SEMVER'
+
 	services {
-		gitlab {
-			type = 'GITLAB'
+		github {
+			type = 'GITHUB'
 			options {
-				AUTHENTICATION_TOKEN = '{{#environmentVariable}}GITLAB_TOKEN{{/environmentVariable}}'
-				REPOSITORY_NAME = '{{#environmentVariable}}CI_PROJECT_NAME{{/environmentVariable}}'
-				REPOSITORY_OWNER = '{{#environmentVariable}}CI_PROJECT_NAMESPACE{{/environmentVariable}}'
+				AUTHENTICATION_TOKEN = '{{#environmentVariable}}GITHUB_TOKEN{{/environmentVariable}}'
+				REPOSITORY_NAME = '{{#environmentVariable}}GITHUB_REPOSITORY{{/environmentVariable}}'
+				REPOSITORY_OWNER = '{{#environmentVariable}}GITHUB_REPOSITORY_OWNER{{/environmentVariable}}'
 			}
 		}
 	}
+
 	verbosity = 'INFO'
 }
 
