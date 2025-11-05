@@ -153,12 +153,13 @@ jobs:
         id: nyx-infer
         run: |
           ./gradlew nyxInfer --no-daemon
-          VERSION=$(./gradlew nyxInfer --no-daemon | grep 'version:' | awk '{print $2}')
+          VERSION=$(./gradlew -q nyxPrint --no-daemon | grep 'Project version:' | awk '{print $3}')
+          if [ -z "$VERSION" ]; then
+            echo "❌ Failed to infer version"
+            exit 1
+          fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "📦 Inferred version: $VERSION"
-          echo "📦 Inferred version: $(./gradlew nyxInfer --no-daemon | grep 'version:' | awk '{print $2}')"
-          VERSION=$(./gradlew -q nyxPrint --no-daemon | grep 'version:' | awk '{print $2}' | sed 's/^v//')
-          echo "📦 Inferred version: $(./gradlew nyxInfer --no-daemon | grep 'version:' | awk '{print $2}')"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
