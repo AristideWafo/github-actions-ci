@@ -63,7 +63,7 @@ nyx {
 		appJar {
 			description = 'Application JAR'
 			fileName = '{{project.name}}-{{version}}.jar'
-            path = 'build/libs/cicd.jar'
+			path = 'build/libs/cicd.jar'
 			type = 'application/java-archive'
 		}
 	}
