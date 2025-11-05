@@ -157,6 +157,7 @@ jobs:
             echo "❌ Failed to infer version"
             exit 1
           fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
