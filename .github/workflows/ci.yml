@@ -180,4 +180,4 @@ jobs:
           body_path: build/CHANGELOG.md
           files: |
             build/libs/*.jar
-            build/CHANGELOG-*.md
+            build/CHANGELOG.md
