@@ -183,7 +183,6 @@ jobs:
             build/CHANGELOG.md
 
       - name: Publish to GitHub Packages
-        if: steps.check-version.outputs.is-new == 'true'
         run: ./gradlew publish --no-daemon
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
